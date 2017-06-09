@@ -1,0 +1,231 @@
++-----------------------------------------------------------------------------------
+Overview
++-----------------------------------------------------------------------------------
+
+--> JS Arrays are just objects.
+--> Both of these create an array:
+		const arrayLiteral = [12, 23, 34, 45];
+		const arrayConstructor = new Array(12, 23, 34, 45);
+--> The length property gets the size: 
+		arr.length
+--> Reading elements out of bounds results in undefined:
+		arr[undefinedIndex] === undefined; // true
+--> Writing to indexes out of array bounds extends the array:
+		const arr = [12, 23, 34];
+		arr[5] = 45; // [12, 23, 34, undefined x 2, 45]
+--> Overriding length property expands/shrinks the array:
+		const arr = [12, 23, 34];
+		arr.length = 5; // [12, 23, 34, undefined x 2]
+		arr.length = 3; // [12, 23, 34]
+--> This trick empties the array:
+		arr.length = 0;
+--> Prefer "array literal" over "array constructor" for two reasons:
+		1) simplicity,
+		2) Someone might override the built-in Array constructor.
+
++-----------------------------------------------------------------------------------
+Array Insertions/Deletions
++-----------------------------------------------------------------------------------
+
+--> arr.push() 
+		1) Adds an item to the end of the array, 
+		2) returns the new array size.
+		
+		const arr = [12, 23, 34];
+		arr.push(45); // 4
+		arr.push(56, 67); // 6
+		
+--> arr.pop()
+		1) Removes an item from the end of the array,
+		2) returns the popped item.
+		
+		const arr = [12, 23, 34];
+		arr.pop(); // 34
+		
+--> arr.unshift()
+		1) Adds an item to the beginning of the array,
+		2) returns the new array size.
+		
+		const arr = [23, 34];
+		arr.unshift(12); // 3
+		
+--> arr.shift()
+		1) Removes an item from the beginning of the array,
+		2) return the shifted item.
+		
+		const arr = [12, 23, 34];
+		arr.shift(); // 12
+		
+--> NOTE: pop and push operations are significantly faster than theur counterparts.
+
+--> delete arr[index]
+		1) Uses the delete command to delete an item,
+		2) but effectively, it puts an undefined at the given index,
+		3) arr.length still reports the same.
+	
+--> arr.splice()
+		1) Does both, inserts and removes items,
+		2) retuns an array of the removed items.
+		
+		const x = [12, 23, 34, 45];
+		const y = x.splice(1, 2, 56, 67, 78);
+		x; // [12, 56, 67, 78, 45]
+		y; // [23, 34]
+		
+--> NOTE: JS provides array.slice() method that returns an array elements without 
+	modifying the array.
+	
+	array.slice(beginOffset, endOffset)
+		1) Returns the array of elements,
+		2) excluding the endOffset.
+		
+		const x = [12, 23, 34, 45];
+		const y = x.slice(1, 3); 
+		x; // [12, 23, 34, 45]
+		y; // [23, 34]
+		
++-----------------------------------------------------------------------------------
+Iterating Over Arrays
++-----------------------------------------------------------------------------------
+
+--> arr.forEach()
+
+	[12, 23, 34].forEach((item, index) => { 
+		console.log(`Item: ${item}, Index: ${index}`); 
+	});
+	
++-----------------------------------------------------------------------------------
+Mapping Arrays
++-----------------------------------------------------------------------------------
+
+--> arr.map()
+
+	[12, 23, 34].map(item => item * 2); // [24, 42, 68]
+	
++-----------------------------------------------------------------------------------
+Testing Array Items
++-----------------------------------------------------------------------------------
+
+--> arr.every()
+		
+		// Test if all array items are even.
+		[12, 24, 36].every(item => item % 2 === 0); // true
+		
+--> arr.some()
+
+		// Test if the array contains atleast one odd number.
+		[12, 23, 34, 36].some(item => item % 2 === 0);
+		
++-----------------------------------------------------------------------------------
+Finding An Item In Array
++-----------------------------------------------------------------------------------
+
+--> arr.find()
+
+		// Find first odd number.
+		[6, 8, 11, 23, 46].find(item => item % 2 === 1); // 11
+		
+		// Find first even number.
+		[11, 23, 33].find(item => item % 2 === 0); // undefined
+		
++-----------------------------------------------------------------------------------
+Finding Multiple Items In Array
++-----------------------------------------------------------------------------------
+
+--> arr.filter()
+
+		// Find all even numbers.
+		[11, 13, 14, 15, 16, 18].filter(item => item % 2 === 0); // [14, 16, 18]
+		
+		// Find all even numbers.
+		[11, 13, 15].filter(item => item % 2 === 0); // []
+		
++-----------------------------------------------------------------------------------
+Finding First Index Of An Array Item
++-----------------------------------------------------------------------------------
+
+--> arr.indexOf()
+
+	// Find index of 23
+	[11, 22, 23, 34, 45, 23, 34].indexOf(23); // 2
+	
++-----------------------------------------------------------------------------------
+Finding Last Index Of An Array Item
++-----------------------------------------------------------------------------------
+
+--> arr.lastIndexOf()
+
+	// Find last index of 23
+	[11, 22, 23, 34, 45, 23, 34].lastIndexOf(23); // 5
+	
++-----------------------------------------------------------------------------------
+Finding Index Of An Array Item Conditionaly
++-----------------------------------------------------------------------------------
+
+--> arr.findIndex()
+
+	[11, 22, 33, 44, 55, 66].findIndex(item => item > 40); // 3
+	
++-----------------------------------------------------------------------------------
+Sorting Arrays
++-----------------------------------------------------------------------------------
+
+--> arr.sort()
+
+	// Ascending Sort
+	[21, 13, 11, 42, 23].sort((a, b) => a - b);
+	
+	// Descending Sort
+	[21, 13, 11, 42, 23].sort((a, b) => b - a);
+	
++-----------------------------------------------------------------------------------
+Aggregating Items With Reduce
++-----------------------------------------------------------------------------------
+
+--> arr.reduce(callback, initialValue)
+
+	// Find the sum of numbers
+	[10, 20, 30, 40, 50].reduce((aggregated, number) => aggregated + number, 0); // 150 
+	
++-----------------------------------------------------------------------------------
+Mocking Array Behaviors
++-----------------------------------------------------------------------------------
+
+--> Mocking object as an array, example 1:
+
+	function Bucket() {};
+	var bucket = new Bucket();
+	
+	Array.prototype.push.call(bucket, 'apple');
+	Array.prototype.push.call(bucket, 'banana');
+	Array.prototype.push.call(bucket, 'orange');
+	
+	// Here you go
+	bucket.length === 3; // true
+	bucket[0] === 'apple'; // true
+	
+	// And finally, let us loop the bucket items
+	Array.prototype.forEach.call(bucket, function(item) { console.log(item); });
+	
+--> Mocking object as an array, example 2:
+
+	// First approach, as usual
+	var cart = {
+		push: function(item) {
+			Array.prototype.push.call(this, item);
+		},
+		forEach: function(callback) {
+			Array.prototype.forEach.call(this, callback);
+		}
+	};
+	
+	// Push some items
+	cart.push('apple');
+	cart.push('banana');
+	cart.push('orange');
+	
+	// Here you go
+	cart[0]; // apple
+	
+	// And, let us iterate
+	cart.forEach(item => { console.log(item); });
