@@ -1,0 +1,58 @@
++-----------------------------------------------------------------------------------
+Overview
++-----------------------------------------------------------------------------------
+
+--> Set is an ordered collection of distinct items.
+--> Let us work with a set of fruit items:
+	
+	// Note last 'apple' is discarded
+	const fruits = new Set(['apple', 'banana', 'orange', 'apple']);
+	
+	// tells the size of set
+	fruits.size; // 3
+	
+	// checks if 'papaya' is there
+	fruits.has('papaya'); // false
+	
+	// the spread operator turns the set into an array
+	[...fruits]; // ['apple', 'banana', 'orange']
+	
+	// iterates fruit items
+	for(let fruit of fruits) {
+		console.log(fruit);
+	}
+	
++-----------------------------------------------------------------------------------
+Union of Sets
++-----------------------------------------------------------------------------------
+
+--> A Union B => Set of all unique elements from A and B both:
+
+	const fruitsA = ['apple', 'banana', 'orange'];
+	const fruitsB = ['papaya', 'banana'];
+	
+	const fruitsCollection = new Set([...fruitsA, ...fruitsB]);
+	
+	fruitsCollection.size; // 4
+	
++-----------------------------------------------------------------------------------
+Intersection of Sets
++-----------------------------------------------------------------------------------
+
+--> A Intersection B => Set of common elements in A and B.
+
+	const setA = new Set(['apple', 'banana', 'orange']);
+	const setB = new Set(['papaya', 'banana']);
+	
+	const setC = new Set([...setA].filter(item => setB.has(item)));
+	
++-----------------------------------------------------------------------------------
+Difference of Sets
++-----------------------------------------------------------------------------------
+
+--> A Difference B => Set of elements in A but not in B.
+
+	const setA = new Set(['apple', 'banana', 'orange']);
+	const setB = new Set(['papaya', 'banana']);
+	
+	const setC = new Set([...setA].filter(item => !setB.has(item)));

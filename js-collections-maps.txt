@@ -1,0 +1,108 @@
++-----------------------------------------------------------------------------------
+Overview
++-----------------------------------------------------------------------------------
+
+--> Dictionaries or maps are collections that map a key to a specific value.
+--> In JS, objects have been used for creating lightweight dictionaries.
+--> But, ES6 defined a completely new type called "map" for the same.
+
++-----------------------------------------------------------------------------------
+Why Prefer Maps over Objects?
++-----------------------------------------------------------------------------------
+
+--> Object keys are always "string". This limits its power to creating dictionaries.
+
++-----------------------------------------------------------------------------------
+The Map Constructor
++-----------------------------------------------------------------------------------
+
+--> This creates a map:
+
+		const map = new Map(); // an empty map
+		
+		map.set('a', 'apple'); // key 'a' maps value 'apple'
+		map.set('b', 'banana'); // key 'b' maps value 'banana'
+		map.get('a'); // 'apple'
+		map.size; // 2
+		map.has('a'); // true
+		map.keys(); // MapIterator {'a', 'b'}
+		map.delete('b'); // deletes key 'b', returns true else false
+		map.size; // 1
+		map.clear(); // empties the map
+		map.size; // 0
+		typeof map; // 'object'
+		
+--> This creates a map via an iterable:
+
+	const map = new Map([
+		['a', 'apple'],
+		['b', 'banana']
+	]);
+	
+--> This creates a map via chaining:
+
+	const map = new Map().set('a', 'apple').set('b', 'banana');
+		
+--> NOTE: Keys may be any arbitrary values, even NaN:
+
+	const map = new Map();
+	const k1 = {}, k2 = {};
+	
+	map.set(k1, 'hello');
+	map.set(k2, 'world');
+	
+	map.get(k1); // hello
+	map.get(k2); // world
+	
+--> What about keys equality?
+
+	const map = new Map();
+	const k1 = {};
+	const k2 = k1;
+	
+	map.set(k1, 'hello');
+	map.set(k2, 'world');
+	
+	map.get(k1); // world
+	map.get(k2); // world
+
+	map.size; // 1
+	
+	k1 === k2; // true;
+	
+--> What about this?
+	
+	const map = new Map();
+	const k1 = NaN;
+	const k2 = k1;
+	
+	map.set(k1, 'hello');
+	map.set(k2, 'world');
+	
+	map.get(k1); // world
+	map.get(k2); // world
+
+	map.size; // 1
+	
+	k1 === k2; // false
+	
++-----------------------------------------------------------------------------------
+Iterating Over Maps: for...of loops
++-----------------------------------------------------------------------------------
+
+--> const fruitsMap = new Map();
+
+	fruitsMap.set('a', 'apple');
+	fruitsMap.set('b', 'banana');
+	
+	for(let item of fruitsMap) { // each item is an array [key, value]
+		console.log(`Key: ${item[0]} | Value: ${item[1]}`);
+	}
+	
+	for(let key of fruitsMap.keys()) {
+		console.log(`Key: ${key} | Value: ${fruitsMap.get(key)}`);
+	}
+	
+	for(let value of fruitsMap.values()) {
+		console.log(value);
+	}
