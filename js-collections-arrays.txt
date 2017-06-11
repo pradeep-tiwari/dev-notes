@@ -6,7 +6,7 @@ Overview
 --> Both of these create an array:
 		const arrayLiteral = [12, 23, 34, 45];
 		const arrayConstructor = new Array(12, 23, 34, 45);
---> The length property gets the size: 
+--> The length property gets the size:
 		arr.length
 --> Reading elements out of bounds results in undefined:
 		arr[undefinedIndex] === undefined; // true
@@ -26,78 +26,78 @@ Overview
 		const num1 = [1,2,3,4];
 		const num2 = [3,4,5,6];
 		const nums = [...num1, ...num2]; // [1,2,3,4,3,4,5,6]
-		
+
 +-----------------------------------------------------------------------------------
 Array Insertions/Deletions
 +-----------------------------------------------------------------------------------
 
---> arr.push() 
-		1) Adds an item to the end of the array, 
+--> arr.push()
+		1) Adds an item to the end of the array,
 		2) returns the new array size.
-		
+
 		const arr = [12, 23, 34];
 		arr.push(45); // 4
 		arr.push(56, 67); // 6
-		
+
 --> arr.pop()
 		1) Removes an item from the end of the array,
 		2) returns the popped item.
-		
+
 		const arr = [12, 23, 34];
 		arr.pop(); // 34
-		
+
 --> arr.unshift()
 		1) Adds an item to the beginning of the array,
 		2) returns the new array size.
-		
+
 		const arr = [23, 34];
 		arr.unshift(12); // 3
-		
+
 --> arr.shift()
 		1) Removes an item from the beginning of the array,
 		2) return the shifted item.
-		
+
 		const arr = [12, 23, 34];
 		arr.shift(); // 12
-		
+
 --> NOTE: pop and push operations are significantly faster than theur counterparts.
 
 --> delete arr[index]
 		1) Uses the delete command to delete an item,
 		2) but effectively, it puts an undefined at the given index,
 		3) arr.length still reports the same.
-	
+
 --> arr.splice()
 		1) Does both, inserts and removes items,
 		2) retuns an array of the removed items.
-		
+
 		const x = [12, 23, 34, 45];
 		const y = x.splice(1, 2, 56, 67, 78);
 		x; // [12, 56, 67, 78, 45]
 		y; // [23, 34]
-		
---> NOTE: JS provides array.slice() method that returns an array elements without 
+
+--> NOTE: JS provides array.slice() method that returns an array elements without
 	modifying the array.
-	
+
 	array.slice(beginOffset, endOffset)
 		1) Returns the array of elements,
 		2) excluding the endOffset.
-		
+
 		const x = [12, 23, 34, 45];
-		const y = x.slice(1, 3); 
+		const y = x.slice(1, 3);
 		x; // [12, 23, 34, 45]
 		y; // [23, 34]
-		
+
 +-----------------------------------------------------------------------------------
 Iterating Over Arrays
 +-----------------------------------------------------------------------------------
 
 --> arr.forEach()
 
-	[12, 23, 34].forEach((item, index) => { 
-		console.log(`Item: ${item}, Index: ${index}`); 
+	[12, 23, 34].forEach((item, index) => {
+		console.log(`Item: ${item}, Index: ${index}`);
 	});
-	
+
 +-----------------------------------------------------------------------------------
 Mapping Arrays
 +-----------------------------------------------------------------------------------
@@ -119,7 +119,7 @@ Testing Array Items
 
 		// Test if the array contains atleast one odd number.
 		[12, 23, 34, 36].some(item => item % 2 === 0);
-		
+
 +-----------------------------------------------------------------------------------
 Finding An Item In Array
 +-----------------------------------------------------------------------------------
@@ -169,7 +169,7 @@ Finding Index Of An Array Item Conditionaly
 --> arr.findIndex()
 
 	[11, 22, 33, 44, 55, 66].findIndex(item => item > 40); // 3
-	
+
 +-----------------------------------------------------------------------------------
 Sorting Arrays
 +-----------------------------------------------------------------------------------
@@ -189,7 +189,7 @@ Aggregating Items With Reduce
 --> arr.reduce(callback, initialValue)
 
 	// Find the sum of numbers
-	[10, 20, 30, 40, 50].reduce((aggregated, number) => aggregated + number, 0); // 150 
+	[10, 20, 30, 40, 50].reduce((aggregated, number) => aggregated + number, 0); // 150
 	
 +-----------------------------------------------------------------------------------
 Mocking Array Behaviors
@@ -199,7 +199,7 @@ Mocking Array Behaviors
 
 	function Bucket() {};
 	var bucket = new Bucket();
-	
+
 	Array.prototype.push.call(bucket, 'apple');
 	Array.prototype.push.call(bucket, 'banana');
 	Array.prototype.push.call(bucket, 'orange');
@@ -213,7 +213,7 @@ Mocking Array Behaviors
 	
 --> Mocking object as an array, example 2:
 
-	// First approach, as usual
+	// Represents a cart
 	var cart = {
 		push: function(item) {
 			Array.prototype.push.call(this, item);
@@ -222,14 +222,14 @@ Mocking Array Behaviors
 			Array.prototype.forEach.call(this, callback);
 		}
 	};
-	
+
 	// Push some items
 	cart.push('apple');
 	cart.push('banana');
 	cart.push('orange');
-	
+
 	// Here you go
 	cart[0]; // apple
-	
+
 	// And, let us iterate
 	cart.forEach(item => { console.log(item); });
