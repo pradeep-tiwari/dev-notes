@@ -1,0 +1,326 @@
+------------------------------------------------------------------------------------
+Overview
+------------------------------------------------------------------------------------
+
+--> Generators are special functions capable of:
+	    1) returning multiple values on a per request basic,
+		2) switching states: suspending & resuming their execution.
+		
+--> Said simply, they produce the next value in the sequence.
+--> Generators generate a sequence of values, but not all at once.
+--> They help in writing elegant async code.
+
+------------------------------------------------------------------------------------
+Generators Workflow
+------------------------------------------------------------------------------------
+
+--> Invoking a generator does not execute it.
+--> It creates an iterator.
+--> Invoking iterator's next() method result an object with properties value & done.
+--> The property value holds the current yield result.
+--> The property done is a boolean indicating if there are more values in the sequence.
+--> Generators behave like state machines:
+
+	"suspended start": when the generator is invoked
+	"executing": when the iterator's next() method is called
+	"suspended yield": when the generator reaches a yield expression
+	"completed": when generator runs either into a run statement, or runs out of code.
+
+--> "suspended start": aka "idle"
+
+	You invoke the generator function, but unlike standard functions, it does not get
+	executed. Instead it creates an iterator object.
+	
+--> "executing":
+
+	You have called the next() method of the iterator which then actually does execute
+	the generator function.
+	
+--> "suspended yield": aka "paused" or "waiting"
+
+	While execution, the generator reaches the yield expression, it is this phase when 
+	a new wrapper object is created carrying the return value and returned.
+	
+--> "completed": aka "closed"
+	
+	While "execution" if the generator runs into a return statement or there is nothing
+	more to yield.
+	
+--> NOTE: To conclude about a generator's states, they are: 
+
+	"suspended", "resumed", "closed"
+
+------------------------------------------------------------------------------------
+An example
+------------------------------------------------------------------------------------
+
+--> Fruits Generator:
+
+	function* FruitsGenerator() {
+	    yield 'apple';
+		yield 'banana';
+		yield 'papaya';
+	}
+	
+	// state: idle
+	const fruitsIterator = FruitsGenerator();
+	
+	// You can verify that an object is being created
+	typeof fruitsIterator === 'object';
+	
+	// state: "executing", if yielded, moves to "waiting" state
+	let fruit = fruitsIterator.next();
+	
+	// this tells if there is more to yield
+	fruit.done; // false
+	
+	// this gives the current yield (produced result)
+	fruit.value; // apple
+	
+	// -----------------------------------------------------------------------------
+	
+	fruit = fruitsIterator.next(); // {value: 'banana', done: false}
+	fruit = fruitsIterator.next(); // {value: 'papaya', done: false}
+	fruit = fruitsIterator.next(); // {value: undefined, done: true}
+	
+--> This generates unique IDs per request basis:
+
+	function* UniqueIdGenerator() {
+		let id = 0;
+		
+		while(true) {
+			yield ++id;
+		}
+	}
+	
+	const iterator = UniqueIdGenerator();
+	
+	iterator.next().value; // 1
+	iterator.next().value; // 2
+	iterator.next().value; // 3
+	
+------------------------------------------------------------------------------------
+Iterating the iterator: Using while-loop
+------------------------------------------------------------------------------------
+
+	function* FruitsGenerator() {
+		yield 'apple';
+		yield 'banana';
+		yield 'papaya';
+	}
+
+	let item; 
+	const iterator = FruitsGenerator();
+	
+	// using the while-loop
+	while(!(item = iterator.next()).done) {
+		console.log(item.value);
+	}
+
+------------------------------------------------------------------------------------
+Iterating the iterator: Using for..of loop
+------------------------------------------------------------------------------------
+
+	function* FruitsGenerator() {
+		yield 'apple';
+		yield 'banana';
+		yield 'papaya';
+	}
+	
+	const iterator = FruitsGenerator();
+	
+	// using the for...of loop
+	for(let result of iterator) {
+		console.log(result);
+	}
+
+------------------------------------------------------------------------------------
+Passing Arguments to Generators
+------------------------------------------------------------------------------------
+
+--> function* PrimesGenerator(num) {
+		let i = 2;
+		
+		while(i < num) {
+			yield (num % i === 0) ? i : -1;
+			i++;
+		}
+	}
+	
+	const iterator = PrimesGenerator(46);
+	
+	// Prints: 2, 23
+	for(let prime of iterator) {
+		if(prime !== -1) {
+			console.log(prime);
+		}
+	}
+	
+------------------------------------------------------------------------------------
+Returning conditionally
+------------------------------------------------------------------------------------
+
+--> function* EvenGenerator(num) {
+		if(num < 2) return;
+		
+		let i = 2;
+		
+		while(i < num) {
+			yield (i % 2 === 0) ? i : -1;
+			i++;
+		}
+	}
+
+	const iterator1 = EvenGenerator(46);
+	
+	// Prints all prime numbers less than 46
+	for(let result of iterator1) {
+		if(result !== -1) {
+			console.log(result);
+		}
+	}
+	
+	// ------------------ But calling the generator with argument 1
+	const iterator2 = EvenGenerator(1);
+	
+	iterator2; // EvenGenerator {[[GeneratorStatus]]: "suspended"}
+	iterator2.next(); // {value: undefined, done: true}
+	
+	NOTE: A generator always yields.
+	
+------------------------------------------------------------------------------------
+Yield Delegation: Yielding to Another Generator
+------------------------------------------------------------------------------------
+	
+--> function* FruitsGenerator() {
+		yield* WinterFruitsGenerator();
+		yield* SummerFruitsGenerator();
+	}
+	
+	function* WinterFruitsGenerator() {
+		yield 'guava';
+		yield 'pomogrenate';
+	}
+	
+	function* SummerFruitsGenerator() {
+		yield 'mango';
+		yield 'orange';
+	}
+	
+	for(let fruit of FruitsGenerator()) {
+		console.log(fruit);
+	}
+	
+--> The chicken/egg paradox
+
+	function* chicken() {
+		yield* egg();
+	}
+	
+	function* egg() {
+		yield* chicken();
+	}
+	
+	const iterator = chicken();
+	
+	// MAXIMUM CALL STACK SIZE EXCEEDED
+	console.log(iterator.next());
+
+------------------------------------------------------------------------------------
+Generator Control Flow
+------------------------------------------------------------------------------------
+
+--> What would be the output?
+
+	function* DummyGenerator() {
+	    yield 'Hello';
+		console.log('World');
+	}
+	
+	const iterator = DummyGenerator();
+	
+	iterator.next().value; // Hello
+	iterator.next().value; // undefined
+	
+	At the next iteration, it logs 'World' because at first call to next() method, the
+	generator yields and suspends. The next call to next() method, the generator resumes,
+	logs the value, and closed.
+
+	"Make a third call to next() and the generator is closed" --- NOPE. The genetor is 
+	closed as soon as there is no more to yield. It is closed at the second call to next().
+	
+--> What would be the output?
+
+	function* DummyGenerator(message) {
+		console.log('log1');
+		yield message;
+		console.log('log2');
+	}
+	
+	const iterator = DummyGenerator('Hello World');
+	
+	// First logs: 'log1', then logs 'Hello World' and suspends
+	iterator.next().value; 
+	
+	// First logs: 'log2' then undefined and closed
+	iterator.next().value;
+	
+------------------------------------------------------------------------------------
+Establishing 2-Way Communication
+------------------------------------------------------------------------------------
+
+--> Unlike functions, a generator can yield multiple values. Like functions, they can 
+	recieve standard arguments.
+	
+--> But what is more interesting is that generators are capable of accepting arguments
+	everytime they are resumed via next() method.
+	
+--> Think this:
+
+	function* WeaponsGenerator(weapon) {
+		yield weapon.toUpperCase();
+		yield weapon.split('').reverse().join('').toUpperCase();
+	}
+	
+	const iterator = WeaponsGenerator('stone');
+	
+	iterator.next().value; // STONE
+	iterator.next('stone').value; // ENOTS
+	
+--> NOTE: The next() method supplies the sent arguments to the waiting yield expression.
+	When making the first call to next() method, there is no "suspended yield" state.
+	
+------------------------------------------------------------------------------------
+Throwing Exceptions
+------------------------------------------------------------------------------------
+
+--> The iterator of a generator function also has a method: throw()
+--> We can throw an exception back to the generator which seems somewhat wierd:
+
+	function* DummyGenerator() {
+		try {
+			yield('Hello');
+			yield('World');
+		} catch(e) {
+			console.log('Oops, an exception');
+			yield e;
+		}
+	}
+	
+	const iterator = DummyGenerator();
+	
+	iterator.next().value; // Hello
+	iterator.throw('Oops').value; // Oops
+	
+--> An interesting observation is when we throw an exception and yield the value.
+	This means throwing exceptions like this is also a way to pass data in the generator.
+	
+------------------------------------------------------------------------------------
+Summary
+------------------------------------------------------------------------------------
+
+--> You define a generator.
+--> Once you invoke it, it enters into "suspended start" state.
+--> The first time next() is called, it enter "execution" state.
+--> Now it yields, and patiently waits for the next request in "suspended yield" state.
+--> When reaches the end curly brace or meets return, it enter "completed" state.
