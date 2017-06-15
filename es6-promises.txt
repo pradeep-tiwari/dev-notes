@@ -1,0 +1,199 @@
+------------------------------------------------------------------------------------
+Overview
+------------------------------------------------------------------------------------
+
+--> We do not wait for asynchronous computations. Instead, we move forward in the
+	hope that we will eventually get the result. This opens new doors of opportunities
+	for dealing with some complex cases, however it is not easy.
+	
+--> Managing async code via callbacks is not very elegant. A promise is a standard 
+	approach to deal with asynchronous situations. 
+	
+--> Codewise, a promise is actually an object.
+
+------------------------------------------------------------------------------------
+The Promise Constructor
+------------------------------------------------------------------------------------
+
+--> You create a promise via new:
+
+	const somePromise = new Promise(executorFunctionCallback);
+	
+--> The Promise constructor is passed a callback which is knows the executor.
+
+--> The executor itself has two parameters which are callback fucntions: 
+	resolve & reject.
+
+--> When things are fine, resolve() function is called and the promise enters the 
+	fullfilled state. Otherwise, reject() function is called.
+	
+--> Note that the executor function is immediatelly called when constructing the
+	promise object, while we need to manually call either one of resolve() or 
+	reject() methods.
+
+--> Now comes the in-built then() method on the promise object. It accepts two 
+	callback functions: success callback & failure callback.
+	
+	somePromise.then(successCallback, failureCallback);
+	
+--> The success callback is called if the promise resolves successfully i.e. if
+	we call the resolve() function, while the error callback is called when there
+	is a problem i.e. the reject() function is called.
+
+------------------------------------------------------------------------------------
+States of a promise: Pending, Fullfilled, Rejected
+------------------------------------------------------------------------------------
+
+--> A promise starts in a pending state.
+
+--> A pending promise is eventually either fullfilled or rejected. For this reason,
+	the pending state is also known as "unresoved" state, while the two other states
+	fall under "resolved" states.
+	
+------------------------------------------------------------------------------------
+A not so useful example
+------------------------------------------------------------------------------------
+	
+--> const dummyPromise = new Promise((resolve, reject) => {
+		resolve(420);
+	});
+	
+	dummyPromise.then(
+		result => { console.log(result); },
+		err => {}
+	);
+	
+	// Output: 420
+	
+--> The above example inh full sybtax:
+
+	const dummyPromise = new Promise(function(resolve, reject) {
+		resolve(420);
+	});
+	
+	dummyPromise.then(
+		function(result) { console.log(result); }, 
+		function() {}
+	);
+
+------------------------------------------------------------------------------------
+Rejecting Promises: Explicitly & Implicitly
+------------------------------------------------------------------------------------
+
+--> When things go wrong, we can explicitly or implicitly reject the promise.
+
+--> To explicitly reject the promise, simply call the reject() function:
+
+	new Promise((resolve, reject) => { reject('Whoops') })
+	.then(() => {}, err => { console.log(err) });
+	
+--> If the executor throws an exception, the promise is rejected implicitly:
+
+	new Promise((resolve, reject) => { throw 'Ooops..' })
+	.then(() => {}, err => { console.log(err) });
+	
+	// another example
+	new Promise((resolve, reject) => { x++; })
+	.then(() => {}, err => { console.log(err) });
+	
+------------------------------------------------------------------------------------
+Built-in catch() method
+------------------------------------------------------------------------------------
+
+--> This method provides an alternative syntax for rejecting promises:
+
+	new Promise((resolve, reject) => { reject('Whoops') })
+	.then(() => {})
+	.catch(err => { console.log(err) });
+	
+--> This approach seems more natural and is preferred.
+
+------------------------------------------------------------------------------------
+Chaining Promises: Yes, because then() returns a new promise
+------------------------------------------------------------------------------------
+
+--> Following outputs: 'log1', then 'log2', and then the error message
+
+	new Promise(resolve => { resolve() })
+	.then(() => { console.log('log1') })
+	.then(() => { console.log('log2') })
+	.then(() => { throw 'Oops' })
+	.catch(err => { console.log(err + ' I will catch rejections at any step') });
+	
+--> NOTE: The above sequence of steps when coded using callbacks, will introduce
+	deeply nested callbacks, aka the callback hell.
+	
+--> When we care only about the success/failure as a whole, rather than failures at 
+	any individual step, a generic catch() is all we need.
+	
+--> When we need to be specific about failure at a given step, ofcourse we can 
+	introduce the error callback to the then() method.
+	
+--> What about this: Never reaches the catch()
+
+	new Promise(resolve => { resolve() })
+	.then(() => { console.log('log1') })
+	.then(() => { console.log('log2') })
+	.then(() => { throw 'Oops' })
+	.then(() => {}, (err) => { console.log(err) })
+	.catch(err => { console.log(err + ' I will catch rejections at any step') });
+	
+------------------------------------------------------------------------------------
+Async Series
+------------------------------------------------------------------------------------
+
+--> Ofcourse, chaining promises is a way to manage a series of interdependent, 
+	asynchronous tasks.
+	
+--> The non-elegant and tedious approach is to introduce deeply nested callback 
+	functions, aka callback hell.
+	
+------------------------------------------------------------------------------------
+Async Parallel: Promise.all()
+------------------------------------------------------------------------------------
+
+--> The Promise.all() method takes an array of promises, and creates a new promise
+	that succeeds if all promises succeed, and fails if even one promise fails.
+
+--> An example, outputs: Hello World
+
+	const promise1 = new Promise(resolve => resolve('Hello')).then(msg => msg);
+	const promise2 = new Promise(resolve => resolve('World')).then(msg => msg);
+
+	Promise.all([promise1, promise2])
+	.then(results => { console.log(results.join(' ')) })
+	.catch(err => { console.log('Whoops: ' + err) });
+	
+--> An example that fails:
+
+	const promise1 = new Promise(resolve => resolve('Hello')).then(msg => msg);
+	const promise2 = new Promise(resolve => { throw 'I failed promise 2' } );
+
+	Promise.all([promise1, promise2])
+	.then(results => { console.log(results.join(' ')) })
+	.catch(err => { console.log('Whoops: ' + err) });
+	
+--> What about this?
+
+	In this case, the catch() method is executed first for promise2, than logs 'Hello'":
+
+	const promise1 = new Promise(resolve => resolve('Hello')).then(msg => msg);
+	const promise2 = new Promise(() => { throw 'I failed promise 2' } ).catch(err => console.log(err));
+
+	Promise.all([promise1, promise2])
+	.then(results => { console.log(results.join(' ')) })
+	.catch(err => { console.log('Whoops: ' + err) });
+	
+------------------------------------------------------------------------------------
+Racing Promises: Promise.race()
+------------------------------------------------------------------------------------
+
+--> Instead of waiting for the combined result of all promises, what if we want to 
+	resolve or reject as soon as one of the promises resolves or rejects?
+	
+--> Here is how its done: Of course pm2 wins the race!!
+
+	const pm1 = new Promise(resolve => setTimeout(resolve, 500, 'Promise1'));
+	const pm2 = new Promise(resolve => setTimeout(resolve, 100, 'Promise2'));
+	
+	Promise.race([pm1, pm2]).then(result => console.log(result));
