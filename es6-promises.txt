@@ -197,3 +197,38 @@ Racing Promises: Promise.race()
 	const pm2 = new Promise(resolve => setTimeout(resolve, 100, 'Promise2'));
 	
 	Promise.race([pm1, pm2]).then(result => console.log(result));
+	
+------------------------------------------------------------------------------------
+What problem does promises solve as compared to callbacks?
+------------------------------------------------------------------------------------
+
+--> In Node.js, there is a famous error handling convention called error-first 
+	callbacks.
+	
+	asyncTask(function(err, result) {
+		if(err) throw new Error('Whoops!!');
+	});
+	
+	Although sounds easy enough, it often leads to difficult error handling code.
+
+--> Once the result is obtained, we may further start another complex task:
+
+	asyncTask(function(err, result) {
+		// process graph generation with the result
+	});
+	
+	Now this second task may lead to errors where again we will have to write code
+	in error first callbacks manner.
+	
+--> Sometimes we are interested in a combined result of independent tasks but we 
+	do not want want to block the execution of individual tasks. So performing
+	tasks in parallel async manner is yet another difficulty.
+	
+--> In short, you will often find yourself in situations where you are wanting to
+	perform one or more of the following things:
+	
+	1) Execute tasks in non-blocking, asynchronous manner.
+	2) But you want tasks to execute in a sequential manner,
+	3) Or, you want the tasks to run in parallel.
+	
+--> Promises help simplify understanding and writing async control flow.
