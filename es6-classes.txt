@@ -1,0 +1,69 @@
+------------------------------------------------------------------------------------
+Overview
+------------------------------------------------------------------------------------
+
+--> ES6 introduced the "class" keyword to simulate classical inheritence:
+
+	class Person {
+		
+		constructor(name) {
+			this.name = name;
+		}
+		
+		sayHi() {
+			return `Hi ${this.name}`;
+		}
+		
+	}
+	
+	// in action
+	const p = new Person();
+	
+	p.name; // undefined
+	p.sayHi(); // Hi undefined
+	
+--> Note that the above class definition is completely same as:
+
+	fucntion Person(name) {
+		this.name = name;
+	}
+	
+	Person.prototype.sayHi = function() {
+		return `Hi ${this.name}`;
+	};
+	
+------------------------------------------------------------------------------------
+Static Methods
+------------------------------------------------------------------------------------
+
+--> Available on a class level:
+
+	class Person() {
+		static fight() {
+			return 'All persons do fight';
+		}
+	}
+	
+	Person.fight(); // 'All persons do fight';
+	
+
+------------------------------------------------------------------------------------
+Inheritence
+------------------------------------------------------------------------------------
+
+--> This is easy:
+
+	class A {}
+	class B extends A {}
+	
+--> Use super() to call base class constructor:
+
+	class A {
+		constructor(name) { this.name = name; }
+	}
+	
+	class B extends A {
+		constructor() {
+			super('John Doe');
+		}
+	}
