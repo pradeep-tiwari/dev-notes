@@ -67,3 +67,33 @@ Inheritence
 			super('John Doe');
 		}
 	}
+	
+------------------------------------------------------------------------------------
+Getters/Setters
+------------------------------------------------------------------------------------
+
+--> Example:
+
+	class Person {
+		constructor(name) {
+			this.title = name || 'unknown';
+		}
+		
+		get name() {
+			return this.title;
+		}
+		
+		set name(value) {
+			if(!/^[a-zA-Z]{2,15}$/.test(value)) {
+				return;
+			}
+			
+			this.title = value.toLowerCase();
+		}
+	}
+	
+	// in action
+	const p = new Person();
+	p.name; // unknown
+	
+	// but title is still exposed

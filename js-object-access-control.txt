@@ -1,0 +1,67 @@
++-----------------------------------------------------------------------------------
+Overview: Getters/Setters
++-----------------------------------------------------------------------------------
+
+--> First something wierd: Following results in: Maximum call stack size exceeded
+
+	const obj = {
+		name: 'Unknown',
+		get name() {
+			return this.name;
+		}
+	};
+
+--> Think this:
+
+	const obj = {
+		title: 'unknown',
+		get name() {
+			return this.title;
+		},
+		set name(value) {
+			if(!/^[a-zA-Z]{2,15}$/.test(value)) {
+				return;
+			}
+			
+			this.title = value.toLowerCase();
+		}
+	};
+	
+	// in action: No need to call as method
+	obj.name; // unknown
+	obj.name = 123;
+	obj.name; // unknown
+	obj.name = 'Pradeep';
+	obj.name; // Pradeep
+	
+	// but title is still exposed
+	obj.title = 'Yuck';
+	obj.title; // Yuck
+	obj.name; // Yuck
+	
+------------------------------------------------------------------------------------
+Getters/Setters using Object.defineProperty()
+------------------------------------------------------------------------------------
+
+--> Example:
+
+	function Person() {
+		let _title = 'unknown';
+		
+		Object.defineProperty(this, 'name', {
+			get: () => _title,
+			set: (value) => _title = value.toLowerCase() 
+		});
+	}
+	
+	// in action
+	const p = new Person();
+	
+	p.name; // unknown
+	p.name = 'MONKEY';
+	p.name; // monkey
+	
+	// Gues what?? you can't access title
+	p._title === undefined; // true
+	
+	
