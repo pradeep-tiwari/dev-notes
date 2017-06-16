@@ -1,0 +1,222 @@
++-----------------------------------------------------------------------------------
+Overview
++-----------------------------------------------------------------------------------
+
+--> Prototypes enable writing object-oriented code in JavaScript.
+--> In JavaScript, inheritence is implemented using prototypes.
+
++-----------------------------------------------------------------------------------
+Object Prototypes
++-----------------------------------------------------------------------------------
+
+--> Property lookup is done on the object or its prototype. So, prototype itself is 
+	an object:
+	
+	const bird = {canFly: true};
+	const swift = {isBeautiful: true};
+	
+	"isBeautiful" in swift; // true}
+	"canFly" in swift; // false
+	
+	Object.setPrototypeOf(swift, bird);
+	
+	"canFly" in swift; // true
+
+--> Prototype chain is similar to the heirarchy in classical inheritence but unlike 
+	them, alive:
+
+	const p1 = {x: 12};
+	const p2 = {y: 13};
+	const p3 = {z: 14};
+	
+	Object.setPrototypeOf(p2, p1);
+	Object.setPrototypeOf(p3, p2);
+	
+	'x' in p3; // true
+	p1.x = 0;
+	p3.x; // 0
+	
+--> Thus, prototype methods and properties are shared across the group of objects in
+	the heirarchy.
+
+--> Objects created using an object literal has built-in property __proto__ that has
+	a reference to its prototype.
+	
+	const p = {};
+	typeof p.__proto__; // "object"
+	
++-----------------------------------------------------------------------------------
+Function Prototypes: Prototypes from the context of a constructor function
++-----------------------------------------------------------------------------------
+	
+--> Every function has a property called prototype that initial refers to an almostobject
+	empty object:
+	
+	function f() {}
+	typeof f.prototype; // "object"
+	
+--> All the object created via the constructor function share the defined properties
+	and method on the function's prototype:
+	
+	function f() {}
+	f.prototype.pointX = 23;
+	f.prototype.pointY = 24;
+	
+	const objF = new f();
+	objF.pointX; // 23
+	objF.pointY; // 24
+	
+--> Note that unless overwritten, the constructor of the protoype point to the function 
+	itself:
+
+	f.protoype.constructor === f;
+		
+--> Instance members are given preference over its prototype members:
+
+	function f() { this.pointX = 23; }
+	f.prototype.pointX = 24;
+	
+	const objF = new f();
+	objF.pointX; // 23
+	
++-----------------------------------------------------------------------------------
+Object typing
++-----------------------------------------------------------------------------------
+
+--> Remember that the constructor property tells which function constructed an object 
+	instance. Let us experiment some:
+	
+	function F() {}
+	const f = new F();
+	
+	// IMPORTANT
+	F.prototype !== undefined;
+	f.prototype === undefined;
+	
+	typeof f === "object"; // true
+	f instanceof F; // true
+	f.constructor === F;
+	F.prototype.constructor === F;
+	
+--> Note that object do no have prototype property, on the functions do.
+
+--> What about this?
+
+	function F() {}
+	
+	const f1 = new F();
+	const f2 = new f1.constructor();
+	
+	f1 instanceof F; // true
+	f2 instanceof F; // true
+
++-----------------------------------------------------------------------------------
+Inheritence with prototypes: The Wrong Way
++-----------------------------------------------------------------------------------
+	
+--> Child.prototype = Parent.prototype
+	
+--> Example:
+
+	function Parent() {}
+	function Child() {}
+	
+	Parent.prototype.sayHi = function() { console.log('Hi') };
+	
+	// Now here is the inheritence
+	Child.prototype = Parent.prototype;
+	
+	const childObj = new Child();
+	childObj.sayHi(); // Hi
+	
+--> What about this? 
+
+	Child.prototype.constructor === Child; // false
+	Child.prototype.constructor === Parent; // true
+
+--> It is suggested to reset the constructor while inheritence:
+
+	Child.prototype.constructor = Child;
+	
+--> BUT WHY IS IT WRONG?
+
+	Because the child's and parent's prototype both are same. Any property you 
+	add/modify on the child's prototype will reflect on the parent too. Now what
+	if there are multiple childs?
+	
+	One child can destroy all other good behaving childs!!
+	
+
++-----------------------------------------------------------------------------------
+Inheritence with prototypes: The Right Way
++-----------------------------------------------------------------------------------
+	
+--> Child.prototype = new Parent();
+	Child.prototype.constructor = Child;
+	
+--> Some people go overboard and do things like this:
+
+	Child.prototype = new Parent();
+	
+	Object.defineProperty(Child.prototype, "constructor", {
+		enumerable: false,
+		value: Child,
+		writable: true
+	});
+	
+--> The fact is all the keys in the above descriptor are configured by default the same 
+	way that we did, except enumerable.
+	
++-----------------------------------------------------------------------------------
+Property Descriptor: Object.defineProperty(obj, prop, descriptor)
++-----------------------------------------------------------------------------------
+
+--> Using the above method, we can define a new property directly on an object or 
+	modify an existing property:
+
+	const obj = {};
+
+	Object.defineProperty(obj, 'x', { enumerable: false });
+	
+--> These are the keys that we can configure:
+	
+	configurable, enumerable, value, writable, get, set
+	
+--> configurable: If set to true, the property can be deleted or configured.
+--> enumerable: If set to true, the property shows up during a for-in loop.
+--> value: Specifies the property value, defaults to undefined.
+--> writable: If set to true, the property value can be changed.
+--> get: Defines the getter function.
+--> set: Defined the setter function.
+
+--> NOTE: get & set keys cannot be defined in conjunction with value and writable keys.
+
++-----------------------------------------------------------------------------------
+How instanceof works?
++-----------------------------------------------------------------------------------
+
+--> Look at this:
+
+	function F() {}
+	
+	const f = new F();	
+	f instanceof F; // true
+	
+	// Now what if?
+	F.prototype = {};
+	
+	f instanceof F; // false
+	
+--> It seems like f is no more an instance of F. Why?
+
+	function F() {}
+	const f = new F();
+	
+	f.__proto__ === F.prototype; // true
+	
+	F.prototype = {};
+	
+	f.__proto__ === F.prototype; // false
+	
+--> Thus, instanceof operator looks if the prototype of the function on the right
+	is in the prototype chain of the object on the left.
