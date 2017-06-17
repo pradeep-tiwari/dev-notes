@@ -1,0 +1,159 @@
+------------------------------------------------------------------------------------
+Overview
+------------------------------------------------------------------------------------
+
+--> JavaScript is single threaded and that essentially means tasks will have to wait 
+	for their execution.
+--> Event loop is at the core of tasks management which does the job of managing tasks
+	using event queues.
+--> Macrotasks are browser actions such as DOM rendering, click handling etc.
+--> Microtasks are tasks within macrotasks such as callbacks, promises etc. and must be
+	executed as soon as possible within the context of that macrotask.
+--> Achieving 60fps is an ideal benchmark required for smooth animations and transitions.
+--> So, time spent executing macro and their micro tasks are taken into optimization
+	considerations.
+--> Remember that an executing task can't be interrupted by other tasks.
+--> Note that implementation of the event-loop is provided by the host environment.
+
+------------------------------------------------------------------------------------
+Timer-manipulation methods
+------------------------------------------------------------------------------------
+
+--> Timers enable delaying the execution of a piece of code asynchronously.
+--> Note that timers implementations are provided by the host environment and are
+	not defined within JavaScript itself.
+--> These timer methods are defined on the global window object:
+		setTimeout, clearTimeout, setInterval, clearInterval
+--> To create timers, use setInterval and setTimeout.
+--> To remove timers, use clearInterval and clearTimeout.
+
+------------------------------------------------------------------------------------
+Optimizing Computationally Expensive Processing Using Timers
+------------------------------------------------------------------------------------
+
+--> Breaking long running UI tasks in chunks via timers helps improve UI response.
+
+--> For example, suppose you have to render graph for class-wise performances for
+	a school or you have to populate multiples of thousands of table rows. It would
+	be good to break them in chunks and render the UI in parts as soon as possible.
+
+------------------------------------------------------------------------------------
+DOM Event Propagation: Capturing & Bubbling
+------------------------------------------------------------------------------------
+
+--> Consider three nested divs: div1 > div2 > div3. Each div has a click handler
+	registered. Ofcourse a click on a div also is a click on its parent. So suppose
+	if div3 is clicked, it definitely must trigger click handlers on div 2 and div1.
+	
+	The question is in what order? Top-down or bottom up?
+	
+--> Netscape & Microsoft made oposing choices.
+
+--> Event Capturing: Implemented by Netscape, in this event model the event handlers 
+	are executed top-down.
+	
+--> Event Bubbling: Implemented by Microsoft, in this event model the event handlers 
+	are executed bottom-up.
+	
+------------------------------------------------------------------------------------
+Two Phases
+------------------------------------------------------------------------------------
+
+--> The standard event handling model embraces both: Capturing & Bubbling.
+--> An event starts propagating from the top element down to the target element. Once
+	the target element is reached, event handling switches to bubbling phase right from
+	the target up to the top element.
+--> We can set the event handling order by passing a third argument to addEventListener()
+	method. This is false by default (bubbling).
+
+------------------------------------------------------------------------------------
+In what order will event handling occur?
+------------------------------------------------------------------------------------
+
+--> Take this scenario: div1 > div2 > div3
+
+	div1.addEventListener('click', () => {}, false); // bubbling
+	div2.addEventListener('click', () => {}, true); // capturing
+	div3.addEventListener('click', () => {}, false); // bubbling
+	
+	So handlers are executed in order: div2 > div3 > div1
+	
+------------------------------------------------------------------------------------
+this & event.target
+------------------------------------------------------------------------------------
+
+--> // The HTML
+	<div id="box">
+		<button></button>
+	<div>
+
+	// The JS Code
+	const box = document.getElementById('box');
+	
+	box.addEventListener('click', function(evt) {
+		this === box; // true
+	});
+	
+--> this refers to the element the event is bound to.
+--> evt.target refers to the element that triggered the event.
+--> Note that the above conclusion is true only when we use regular callbacks and	
+	not arrow functions:
+	
+	box.addEventListener('click', evt => {
+		this === box; // false
+	});
+--> Until arrow functions, every new function defined its own this value.
+--> In strict mode, this is ubndefined, else window object.
+
+------------------------------------------------------------------------------------
+Event Delegation
+------------------------------------------------------------------------------------
+
+--> It is more performant to listen for events on the container parent instead of the 
+	individual elements.
+	
+--> Delegate event handling on ancestors and you life will be easy in terms of 
+	maintainence and performance.
+	
+------------------------------------------------------------------------------------
+Custom Events: Promoting Loose Coupling
+------------------------------------------------------------------------------------
+
+--> What if we could do something like this:
+
+	document.addEventListener('product-added', e => {
+		// highlight cart
+	});
+	
+	document.addEventListener('product-removed', e => {
+		// update cart count
+	});
+	
+--> Note that custom-events see like implementing observers, and probably they are,
+	but the approach is very different and elegant.
+
+--> Yes we can simulate events as per our wish.
+
+------------------------------------------------------------------------------------
+Creating a custom event
+------------------------------------------------------------------------------------
+
+--> When the button is clicked, we create and dispatch a custom event.
+
+	document.getElementById('btn').addEventListener('click', () => {
+		
+		var productAddedEvent = new CustomEvent('product-added', {
+			details: { id: '#123', name: 'Learn JavaScript' }
+		});
+		
+		document.dispatchEvent(productAddedEvent);
+		
+	});
+	
+--> Now we listen to the event on document:
+
+	document.addEventListener('product-added', e => {
+		console.log(e.detail);
+	});
+	
+--> The event can be listened on another target object also.
