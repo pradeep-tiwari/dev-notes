@@ -1,0 +1,86 @@
+------------------------------------------------------------------------------------
+Overview
+------------------------------------------------------------------------------------
+
+--> Proxies stand in front of objects as surrogates.
+--> They enable us to define custom access that will be executed when an object is
+	being interacted.
+--> We might be interested in logging all the called methods of an object. Ofcourse,
+	either we can writem custom log calls within each method body or simply use proxies.
+	
+------------------------------------------------------------------------------------
+The Proxy Constructor
+------------------------------------------------------------------------------------
+
+--> This creates a proxy object:
+
+	const proxy = new Proxy(obj, descriptor);
+	
+--> Example:
+
+	const router = {
+		get: () => 'GET',
+		post: () => 'POST'
+	};
+	
+	const routerProxy = new Proxy(router, {
+		// The get trap
+		get: (target, key) => {
+			console.log('REPORT: called getter');
+			
+			if(key in target === false) {
+				throw new Error('Unsupported method');
+			}
+			
+			return target[key];
+		},
+		// The set trap
+		set: (target, key, value) => {
+			console.log('REPORT: called setter');
+			
+			if(['get', 'post', 'put', 'delete'].indexOf(key) === -1) {
+				throw new Error('Unsupported method');
+			}
+			
+			if(typeof value !== 'function') {
+				throw new Error('Only callbacks are allowed to be set');
+			}
+			
+			target[key] = value;
+		}
+	});
+	
+	// in action: does the job
+	routerProxy.put = () => 'PUT';
+
+	// calling the put method
+	routerProxy.put(); // PUT
+	
+	// router itself now has put key
+	router.put();
+	
+	// Oops, throws an exception
+	routerProxy.patch = () => 'PATCH';
+		
+------------------------------------------------------------------------------------
+Proxy Traps or intercepts: Think of them as magic calls
+------------------------------------------------------------------------------------
+
+--> We can intercept many operations.
+--> The proxy behaviors we defined are essentially called traps.
+--> We defined getters/setters traps in the above example.
+--> Other traps are: apply, construct, enumerate, getPrototypeOf, setPrototypeOf
+--> Note that following operations cannot be intercepted:
+
+	==, ===, instanceof, typeof
+------------------------------------------------------------------------------------ 
+Traps and when they get activated
+------------------------------------------------------------------------------------
+
+--> apply: when the function is called.
+--> construct: when the function is called vis new operator.
+--> get: when reading a property.
+--> set: when writing a property.
+--> enumerate: when looped using for-in statement.
+--> getPrototypeOf: when getting the prototype value.
+--> setPrototypeOf: when setting the prototype value.
