@@ -1,0 +1,284 @@
+------------------------------------------------------------------------------------
+Overview
+------------------------------------------------------------------------------------
+
+--> A regular expression specifies a pattern to match a text string.
+--> Regular expression literal: /exp/
+--> RegExp object: new RegExp('exp')
+--> Prefer literal when the regex is known in advance.
+--> Prefer the object approach when regex is built runtime.
+--> By default a regex match is local, i.e. only the first match.
+--> Pattern modifiers can be used to tweak the regex.
+
+------------------------------------------------------------------------------------
+Pattern Modifiers aka flags
+------------------------------------------------------------------------------------
+	
+--> i : makes the regex case-insensitive.
+--> g : matches all occurrences (pattern instances) as opposed to local.
+--> m : matches across multiple lines.
+--> y : enables sticky matching.
+--> u : enables the use of Unicode point escapes
+
+------------------------------------------------------------------------------------
+Using pattern modifiers
+------------------------------------------------------------------------------------
+
+--> Regex literal: 
+	
+	const pattern = /exp/ig;
+	
+--> Regex object:
+
+	const pattern = nre RegExp('exp', 'ig');
+	
+------------------------------------------------------------------------------------
+Exact matching
+------------------------------------------------------------------------------------
+
+--> /test/ means t followed by e followed by s followed by t.
+--> It also means the string matches the pattern if 'test' is present in the string.	
+
+------------------------------------------------------------------------------------
+Set operator (aka Character class operator)
+------------------------------------------------------------------------------------
+
+--> Square brackets [] is a character class operator.
+--> Placing a caret right after the opening square bracket negates the match to 
+	anything but a finite set of characters.
+--> Dash - indicates a range.
+--> [abc] means match any of the characters a, b, c.
+--> [^abc] means match aby character but a, b, or c.
+--> [a-m] means match any character from a through m inclusive.
+
+------------------------------------------------------------------------------------
+Escaping
+------------------------------------------------------------------------------------
+
+--> Because some characters have special meaning, escape them to treat them literally,
+	and not specially.
+--> \[ specifies a literal [ charcter.
+--> \\ specifies literal \ backslash.
+
+------------------------------------------------------------------------------------
+Begins & Ends
+------------------------------------------------------------------------------------
+
+--> Use a caret as first regex character to match the the pattern at the beginning
+	of the string.
+--> Use $ as the last regex character to match at the end.
+--> /^abc/ matches only if the string begins with abc.
+--> /abc$/ matches only if the strong ends with abc.
+--> /^abc$/ matches only when the string is exactly abc.
+--> Ofcourse /abc/ matches when abc appears anywhere in the string.
+
+------------------------------------------------------------------------------------
+Repeated occurrences
+------------------------------------------------------------------------------------
+
+--> ? specifies a character is optional i.e. at most once.
+--> + specifies at least once.
+--> * specifies any number of times.
+--> {m,n} specifies a range for the repetition.
+--> {m,} specifies an open-ended range.
+--> Note all these apply on the preceding character.
+
+------------------------------------------------------------------------------------
+Greedy/Nongreedy matches
+------------------------------------------------------------------------------------
+
+--> Repitition operators are greedy by default. They will try to consume the 
+	longest possible characters that make up a match. This costs performance.
+--> Annotate the operator with a ? character to make it nongreedy.
+--> This means ? is an overloaded operator.
+--> /a+/ would match all the three a characters against string 'yodaaa'.
+--> /a+/ would match onlt the first a character against string 'yodaaa' because
+	that satisfies the match condition.
+
+------------------------------------------------------------------------------------
+Predefined term     Matches 
+------------------------------------------------------------------------------------
+
+\d    				Any decimal digit i.e. [0-9]
+\D	  				Any character but a decimal digit i.e. [^0-9]
+\w    				[A-Za-z0-9_]
+\W    				[^A-Za-z0-9_]
+\s    				Any whitespace character (space, tab, form feed, etc)
+\S    				Any character but a whitespace character
+\b   				A word boundary
+\B    				Not a word boundary i.e inside a word
+.	  				Any character, except whitespace characters
+\t    				Horizontal tab
+\v    				Vertical tab
+\b    				Backspace
+\f    				Form feed
+\r    				Carriage return
+\n    				Newline
+\cA : \cZ    		Control characters
+\x00 : \xFF        	ASCII hexadecimal 
+\u0000 : \uFFFF    	Unicode hexadecimal 
+
+------------------------------------------------------------------------------------
+Grouping
+------------------------------------------------------------------------------------
+
+--> Because the regex operators effect only the preceding character, we may put the
+	characters in a pair of parenthesis to treat them as a single unit.
+--> This creates a regular expression which matches a string with a substring that 
+	consists of four consecutive 'ab': 
+	
+	const regex = /(ab){4}/;
+
+------------------------------------------------------------------------------------
+Grouping Side Effects
+------------------------------------------------------------------------------------
+
+--> When a part of regex is grouped, it produces a good side effect known as capture.
+	
+------------------------------------------------------------------------------------
+Alternation (OR)
+------------------------------------------------------------------------------------
+
+--> This regex matches a string with four consecutive a's or b's:
+
+	const regex = /(a|b){4}/;
+	
+------------------------------------------------------------------------------------
+Compiling regular expressions
+------------------------------------------------------------------------------------
+
+--> A regex is first compiled and then executed.
+--> To optimize, we should make it compile once and then let it execute as many times
+	as desired.
+--> A regex is compiled when created.
+
+------------------------------------------------------------------------------------
+Test if pattern matches?
+------------------------------------------------------------------------------------
+
+--> via literal:
+
+	const regex = /a?/i;
+	regex.test('Hola chef'); // true
+	
+--> via RegExp()
+
+	const regex = new RegExp('a?', 'i');
+	regex.test(Hola chef);
+	
+------------------------------------------------------------------------------------
+Capturing matching segments
+------------------------------------------------------------------------------------
+
+--> Determining what was matched is very useful.
+
+------------------------------------------------------------------------------------
+Performing simple capture: String.prototype.match()
+------------------------------------------------------------------------------------
+
+--> Returns an array object if match found else null.
+
+--> 'a aa a a aaa aaaa'.match(/a+/g);
+--> 'a aa a a aaa aaaa'.match(/a+/g);
+--> 'lazy fox foox foox'.match(/f(o+)x+/g);
+
+------------------------------------------------------------------------------------
+regex.exec()
+------------------------------------------------------------------------------------
+
+--> Iterate through captures until no match found:
+
+	const regex = /do+g/g;
+	let match;
+	
+	while(match = regex.exec('dog doog dooog')) {
+		console.log(match[0]);
+	}
+
+------------------------------------------------------------------------------------
+Backreferences: Referencing Captures
+------------------------------------------------------------------------------------
+
+--> Backreference using capture position like \1, \2, \3 etc:
+
+	const str = '<person>Hit Man</person>';
+	str.match(/<(\w+)>Hit Man<\/\1>/);
+
+------------------------------------------------------------------------------------
+String.prototype.replace()
+------------------------------------------------------------------------------------
+
+--> const cc = '3212-3324-5676-9087';
+	cc.replace(/\d{4}/, 'XXXX'); // XXXX-3324-5676-9087
+	
+--> const cc = '3212-3324-5676-9087';
+	cc.replace(/\d{4}/g, 'XXXX'); // XXXX-XXXX-XXXX-XXXX
+	
+--> const cc = '3212-3324-5676-9087';
+	cc.replace(/\d/g, 'X'); // XXXX-XXXX-XXXX-XXXX
+	
+
+--> We can use captures and their backreferences but now with $1, $2, $3 etc:
+
+	'stackFry'.replace(/([A-Z])/, '-$1'); // stack-Fry
+	'stackFry'.replace(/([A-Z])/, '-$1').toLowerCase(); // stack-fry
+	
+--> 'fox lazy'.replace(/(\w+)\s(\w+)/, '$2 $1'); // lazy fox
+
+------------------------------------------------------------------------------------
+Noncapturing groups
+------------------------------------------------------------------------------------
+
+--> Look at this:
+
+	'fox lazy'.replace(/((\w+)\s(\w+))/, '$1 - $3 - $2'); // fox lazy - lazy - fox
+	
+--> Now place ?: right after the first parenthesis:
+
+	'fox lazy'.replace(/(?:(\w+)\s(\w+))/, '$2 - $3 - $1'); // lazy - $3 - fox
+	
+--> What happend is you explicitly specified that do not treat first paranthesis as 
+	capture.
+	
+--> Because a parenthesis serves double duty: gouping & capturing both, placing ?:
+	immediately after the opening parenthesis makes is noncapturing group.
+	
+--> The notation ?: makes a parenthesis a "passive subexpression".
+
+------------------------------------------------------------------------------------
+Callbacks as replace parameter: str.replace(regex, callback)
+------------------------------------------------------------------------------------
+
+--> 'str'.replace(/\w/g, function(match) { return match.toUpperCase(); }) // STR
+
+--> To get the details of all callback parameters:
+
+	'str'.replace(/\w/g, function(match) { console.log(arguments); })
+	
+--> How would you convert:
+
+	target: 'foo=1&foo=2&bar=a&bar=b&foo=3'
+	result: 'foo=1,2,3&bar=a,b'
+	
+--> Solution:
+
+	function compress(query) {
+		let obj = [];
+		let result = '';
+		
+		query.replace(/(\w+)=(\w+)/g, function() {
+			if(obj[arguments[1]]) {
+				obj[arguments[1]].push(arguments[2]);
+			} else {
+				obj[arguments[1]] = [arguments[2]];
+			}
+			
+			return '';
+		});
+		
+		Object.keys(obj).forEach(function(key) {
+			result += `${key}=${obj[key]}&`;
+		});
+		
+		return result.substr(0, result.length - 1);
+	}
