@@ -1,0 +1,47 @@
+<table><tbody></tbody></table>
+
+<script>
+	
+/**
+ * Inserts 20000 rows and 6 cells per row
+ */
+
+function r2() {
+	const tbody = document.querySelector('tbody');
+	const rowsCount = 20000;
+	const divideInto = 2000;
+	const chunks = rowsCount/divideInto;
+	
+	let intervalCount = 1;
+		
+	setTimeout(callback);
+	
+	function callback() {
+		
+		for(let i = 0; i < chunks; i++) {
+			const tr = document.createElement('tr');
+			
+			for(let j = 0; j < 6; j++) {
+				const td = document.createElement('td');
+				
+				td.innerHTML = (chunks * (intervalCount - 1) + i) + ', ' + j;
+				tr.appendChild(td); 
+			}
+		
+			tbody.appendChild(tr);
+		}
+	
+		intervalCount++;
+		
+		if(intervalCount < 2001) {
+			setTimeout(callback);	
+		}
+	}
+}
+
+r2();
+
+</script>
+
+
+
